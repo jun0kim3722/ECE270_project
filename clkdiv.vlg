@@ -1,0 +1,42 @@
+module clkdiv #(
+    parameter BITLEN = 20
+) (
+    input logic clk, rst, 
+    input logic [BITLEN-1:0] lim,
+    output logic hzX
+);
+
+  logic [BITLEN-1:0] next_Q;
+  logic [BITLEN-1:0] Q;
+
+  always_ff @ (posedge clk, posedge rst) begin
+	if (rst) begin
+  	hzX <= 0;
+  	Q <= 0;
+	end
+	else begin
+	hzX <= hzX;
+  	if(next_Q == lim) begin
+    	hzX <= ~hzX;
+  	end
+  	Q <= next_Q;
+	end
+  end
+ 
+   always_comb begin
+ 	 next_Q = Q + 1;
+  	// next_Q[0] = ~Q[0];
+  	// next_Q[1] = Q[1] ^ Q[0];
+  	// next_Q[2] = Q[2] ^ (Q[1] & Q[0]);
+  	// next_Q[3] = Q[3] ^ (Q[2] & Q[1] & Q[0]);
+  	// next_Q[4] = Q[4] ^ (Q[3] & Q[2] & Q[1] & Q[0]);
+  	// next_Q[5] = Q[5] ^ (Q[4] & Q[3] & Q[2] & Q[1] & Q[0]);
+  	// next_Q[6] = Q[6] ^ (Q[5] & Q[4] & Q[3] & Q[2] & Q[1] & Q[0]);
+  	// next_Q[7] = Q[7] ^ (Q[6] & Q[5] & Q[4] & Q[3] & Q[2] & Q[1] & Q[0]);
+ 	 
+  	if (Q == lim) begin
+    	next_Q = 0;
+  	end
+ end
+
+endmodule

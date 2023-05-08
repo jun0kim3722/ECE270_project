@@ -1,0 +1,41 @@
+module sample #(
+      parameter SAMPLE_FILE = "../audio/kick.mem",
+      parameter SAMPLE_LEN = 4000
+  )
+  (
+      input clk, rst, enable,
+      output logic [7:0] out
+  );
+  
+  logic [7:0] audio_mem [4095:0];
+  initial $readmemh(SAMPLE_FILE, audio_mem, 0, SAMPLE_LEN);
+  
+  logic [11:0] counter;
+  logic prev_en;
+  
+  always_ff @ (posedge rst, posedge clk) begin
+    if (rst) begin
+      counter <= 12'd0;
+      prev_en <= 1'd0;
+    end
+    else begin
+        if (prev_en & enable)
+            if (counter >= SAMPLE_LEN)
+                counter <= 12'd0;
+            else
+                counter <= counter + 12'd01;
+        else if (~enable & prev_en)
+            counter <= 12'd0;
+
+        prev_en <= enable;
+    end 
+  end
+  
+  always_ff @ (posedge clk, posedge rst) begin
+    if (rst)
+        out <= 8'd0;
+    else
+        out <= audio_mem[counter];
+  end
+  
+endmodule
